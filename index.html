@@ -1,584 +1,855 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Time Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root{--bg:#0d0f14;--surface:#161a23;--surface2:#1e2330;--surface3:#252b3b;--border:#2a3045;--border2:#3a4460;--text:#e8ecf4;--text2:#8b93a8;--text3:#545c72;--accent:#4f8ef7;--accent2:#3a7af0;--green:#34d399;--green-bg:rgba(52,211,153,0.12);--red:#f87171;--red-bg:rgba(248,113,113,0.12);--amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;}
-.app{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
-.logo{display:flex;align-items:center;gap:10px;}
-.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#4f8ef7,#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;}
-.logo h1{font-size:20px;font-weight:600;}
-.logo p{font-size:12px;color:var(--text2);margin-top:1px;}
-.clock-badge{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:.04em;}
-.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .15s,transform .1s;}
-.btn:hover{opacity:.85;}.btn:active{transform:scale(.97);}
-.btn-primary{background:var(--accent);color:white;}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.btn-ghost:hover{background:var(--surface2);color:var(--text);opacity:1;}
-.btn-sm{padding:6px 11px;font-size:12px;border-radius:8px;}
-.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:1.75rem;}
-.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;overflow:hidden;}
-.emp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .2s;}
-.emp-card:hover{border-color:var(--border2);background:var(--surface2);}
-.emp-card.selected{border-color:var(--accent);}
-.emp-card.selected::before{background:linear-gradient(90deg,#4f8ef7,#7c3aed);}
-.card-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;opacity:0;transition:opacity .15s;}
-.emp-card:hover .card-actions{opacity:1;}
-.card-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;}
-.card-btn:hover{background:var(--surface3);color:var(--text);}
-.card-btn.del:hover{color:var(--red);border-color:var(--red);}
-.card-btn.adv:hover{color:var(--amber);border-color:var(--amber);}
-.emp-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-right:68px;}
-.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
-.emp-name{font-size:14px;font-weight:600;}
-.emp-role{font-size:11px;color:var(--text2);margin-top:1px;}
-.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 9px;border-radius:20px;}
-.badge-in{background:var(--green-bg);color:var(--green);}
-.badge-out{background:rgba(139,147,168,0.1);color:var(--text2);}
-.badge-dot{width:6px;height:6px;border-radius:50%;}
-.badge-in .badge-dot{background:var(--green);}
-.badge-out .badge-dot{background:var(--text3);}
-.emp-hours{font-size:24px;font-weight:600;margin-top:10px;font-family:'JetBrains Mono',monospace;}
-.emp-hours-label{font-size:11px;color:var(--text3);margin-top:2px;}
-.adv-pill{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,0.2);}
-.punch-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;display:none;}
-.punch-wrap.visible{display:block;}
-.punch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px;}
-.punch-btns{display:flex;gap:8px;}
-.btn-in,.btn-out{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .15s,transform .1s;}
-.btn-in{background:var(--green);color:#0a1a0f;}
-.btn-out{background:var(--red);color:#1a0a0a;}
-.btn-in:hover,.btn-out:hover{opacity:.85;}
-.btn-in:active,.btn-out:active{transform:scale(.97);}
-.btn-in:disabled,.btn-out:disabled{opacity:.25;cursor:not-allowed;transform:none;}
-.punch-name{font-size:15px;font-weight:600;}
-.punch-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-.log-list{display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto;margin-top:12px;}
-.log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--surface2);border-radius:9px;font-size:12px;border:1px solid var(--border);}
-.log-dur{color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;}
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.5rem;}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;}
-.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
-.stat-val{font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;}
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
-.table-hdr{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{padding:10px 18px;text-align:left;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
-td{padding:10px 18px;border-bottom:1px solid var(--border);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--surface2);}
-.ot{color:var(--amber);}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Time Station & Absence Registry</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
 
-/* Advance modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(5px);}
-.modal-bg.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:1.75rem;width:400px;max-width:96vw;box-shadow:0 24px 60px rgba(0,0,0,.6);}
-.modal h2{font-size:16px;font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;}
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
-.field input,.field select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'Space Grotesk',sans-serif;transition:border-color .15s;}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
-.field select option{background:var(--surface2);}
-.modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem;}
-.btn-cancel{padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
-.btn-cancel:hover{background:var(--surface2);}
-.btn-save{padding:8px 16px;border-radius:9px;border:none;background:var(--accent);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
-.btn-save:hover{background:var(--accent2);}
-.btn-del{padding:8px 16px;border-radius:9px;border:none;background:var(--red);color:#1a0a0a;font-size:13px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
-.btn-del:hover{opacity:.85;}
-.del-box{background:var(--red-bg);border:1px solid rgba(248,113,113,0.3);border-radius:9px;padding:12px;font-size:13px;color:var(--red);margin-bottom:1rem;line-height:1.5;}
-.color-picks{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
-.color-pick{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.color-pick.chosen{border-color:white;transform:scale(1.15);}
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-/* Advances list inside modal */
-.adv-total-box{background:var(--amber-bg);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
-.adv-total-label{font-size:12px;color:var(--amber);}
-.adv-total-val{font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--amber);}
-.adv-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;margin-bottom:1rem;}
-.adv-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);font-size:13px;}
-.adv-info{display:flex;flex-direction:column;gap:2px;}
-.adv-note{color:var(--text2);font-size:11px;}
-.adv-date{font-size:11px;color:var(--text3);}
-.adv-amount{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--amber);}
-.adv-del{width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:11px;flex-shrink:0;transition:all .12s;}
-.adv-del:hover{color:var(--red);border-color:var(--red);background:var(--red-bg);}
-.add-adv-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.settle-row{display:flex;align-items:center;justify-content:space-between;background:var(--green-bg);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:10px 14px;margin-top:4px;}
-.settle-label{font-size:12px;color:var(--green);}
-.btn-settle{padding:6px 14px;border-radius:8px;border:none;background:var(--green);color:#0a1a0f;font-size:12px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
-.btn-settle:hover{opacity:.85;}
+        .container {
+            width: 100%;
+            max-width: 1250px;
+        }
 
-.import-banner{background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);border-radius:14px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.import-banner h3{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:2px;}
-.import-banner p{font-size:12px;color:var(--text2);}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.ok{border-color:rgba(52,211,153,0.4);color:var(--green);}
-::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
-</style>
+        /* HEADER & CANVAS ANALOGUE CLOCK */
+        .header-widget {
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 40px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .brand-text h1 { margin: 0; font-size: 28px; color: var(--primary); letter-spacing: -0.5px; }
+        .brand-text p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 14px; font-weight: 500; }
+
+        .clock-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #digitalClock {
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* LAYOUT MAIN SPLIT WORKSPACE */
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 950px) {
+            .app-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            margin-top: 0; margin-bottom: 18px; font-size: 16px; font-weight: 700;
+            border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; color: #1e293b;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .form-inline { display: flex; gap: 8px; margin-bottom: 12px; }
+
+        input[type="text"], select, input[type="date"] {
+            width: 100%; padding: 11px 14px; font-size: 14px;
+            border: 1px solid var(--border); border-radius: 8px;
+            outline: none; background-color: #fff; box-sizing: border-box;
+        }
+        input:focus, select:focus:focus { border-color: var(--primary); }
+
+        .btn {
+            padding: 10px 16px; font-weight: 600; border-radius: 8px;
+            cursor: pointer; border: none; font-size: 13px; white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-warning { background-color: var(--warning); color: white; }
+        .btn-warning:hover { background-color: #d97706; }
+
+        /* KIOSK TERMINAL BLOCKS GRID */
+        .kiosk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .employee-block {
+            padding: 24px 12px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+        }
+
+        .block-out { background-color: #f8fafc; border-color: #e2e8f0; color: #334155; }
+        .block-out:hover { background-color: #f1f5f9; border-color: var(--success); transform: translateY(-2px); }
+        .block-out .status-indicator { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+
+        .block-in { background-color: #f0fdf4; border-color: #10b981; color: #166534; }
+        .block-in:hover { background-color: #fdf2f2; border-color: var(--danger); color: #991b1b; transform: translateY(-2px); }
+        .block-in .status-indicator { color: var(--success); font-size: 12px; font-weight: 700; }
+
+        .employee-block:hover .status-indicator { display: none; }
+        .hover-action-text { display: none; font-size: 12px; font-weight: 700; }
+        .employee-block:hover .hover-action-text { display: block; }
+        .block-out .hover-action-text { color: var(--success); }
+        .block-in .hover-action-text { color: var(--danger); }
+
+        .employee-name { font-size: 15px; font-weight: 700; word-break: break-word; }
+
+        /* ATTENDANCE DASHBOARD STATUS PANELS */
+        .dash-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; }
+        .dash-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px;
+        }
+        .status-working { background-color: #f0fdf4; border-color: #bbf7d0; color: #166534; font-weight: 600;}
+        .status-out { background-color: #f8fafc; border-color: var(--border); color: #64748b; }
+        
+        .timer-badge {
+            font-family: monospace; font-size: 14px; font-weight: 700; background-color: #10b981;
+            color: white; padding: 4px 10px; border-radius: 6px;
+        }
+        .out-badge { font-size: 12px; font-weight: 600; background-color: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 6px; }
+        .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .dot-green { background-color: var(--success); animation: pulse 2s infinite; }
+        .dot-gray { background-color: #94a3b8; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* METRICS LIVE STATS BANNER */
+        .metrics-counter-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .metric-mini-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px 15px; display: flex; flex-direction: column; }
+        .metric-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .metric-value { font-size: 18px; font-weight: 800; color: #1e293b; margin-top: 2px; }
+
+        /* DETAILED PROCESSED TIMECARDS LAYOUT */
+        .analytics-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .analytics-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9; }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px; }
+        th { background-color: #f8fafc; color: var(--text-muted); padding: 12px; font-weight: 600; border-bottom: 2px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        
+        /* Specialized Color Badges for Analytics Engine */
+        .badge-standard { background-color: #eff6ff; color: #1d4ed8; padding: 4px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #bfdbfe; }
+        .badge-target-full { background-color: #f0fdf4; color: #15803d; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #bbf7d0; }
+        .badge-absence-excuse { background-color: #fff7ed; color: #c2410c; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #ffedd5; }
+        
+        .btn-danger-outline { background: none; border: 1px solid #fca5a5; color: var(--danger); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-danger-outline:hover { background: #fee2e2; }
+
+        .roster-ui-list { max-height: 80px; overflow-y: auto; padding: 0; margin: 0 0 10px 0; list-style: none; border: 1px solid var(--border); border-radius: 8px;}
+        .roster-ui-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .roster-ui-item:last-child { border-bottom: none; }
+        .admin-box { display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: #fafafa; padding: 8px; border-radius: 8px; border: 1px dashed var(--border); }
+        .no-data { text-align: center; color: var(--text-muted); padding: 25px; }
+
+        /* ADVANCES MODAL OVERLAY */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:16px; padding:28px; width:420px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto; }
+        .modal-box h3 { margin:0 0 18px 0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px; }
+        .adv-total-bar { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .adv-total-label { font-size:12px; font-weight:700; color:#c2410c; text-transform:uppercase; }
+        .adv-total-val { font-size:22px; font-weight:800; color:#c2410c; font-family:monospace; }
+        .adv-list { display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto; margin-bottom:16px; }
+        .adv-entry { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; font-size:13px; }
+        .adv-entry-left { display:flex; flex-direction:column; gap:2px; }
+        .adv-entry-amount { font-weight:800; color:#c2410c; font-family:monospace; font-size:14px; }
+        .adv-entry-note { color:#64748b; font-size:11px; }
+        .adv-entry-date { color:#94a3b8; font-size:11px; }
+        .adv-del-btn { background:none; border:1px solid #fca5a5; color:#ef4444; border-radius:6px; padding:3px 8px; cursor:pointer; font-size:11px; }
+        .adv-del-btn:hover { background:#fee2e2; }
+        .adv-add-form { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:14px; }
+        .adv-add-form label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; display:block; margin-bottom:4px; }
+        .adv-form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+        .adv-add-btn { background:#f59e0b; color:white; border:none; border-radius:8px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:13px; }
+        .adv-add-btn:hover { background:#d97706; }
+        .adv-settle-row { display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 16px; margin-bottom:14px; }
+        .adv-settle-label { font-size:12px; color:#166534; font-weight:600; }
+        .adv-settle-btn { background:#10b981; color:white; border:none; border-radius:8px; padding:7px 14px; font-weight:700; cursor:pointer; font-size:12px; }
+        .adv-settle-btn:hover { background:#059669; }
+        .modal-close-btn { width:100%; padding:10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; font-weight:600; cursor:pointer; font-size:13px; color:#475569; }
+        .modal-close-btn:hover { background:#e2e8f0; }
+        .adv-pill-badge { display:inline-block; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; }
+    </style>
 </head>
 <body>
-<div class="app">
-  <div class="topbar">
-    <div class="logo">
-      <div class="logo-icon"><i class="ti ti-clock" style="color:white;font-size:20px"></i></div>
-      <div><h1>Time Tracker</h1><p>Employee hours monitor</p></div>
+
+    <div class="container">
+        
+        <!-- BRANDING TOPBAR DISPLAY -->
+        <div class="header-widget">
+            <div class="brand-text">
+                <h1>Workforce Time Station</h1>
+                <p>Kiosk Attendance Dashboard & Authorized Absence Registry</p>
+            </div>
+            <div class="clock-wrapper">
+                <canvas id="analogueClockCanvas" width="90" height="90"></canvas>
+                <div id="digitalClock">00:00:00 AM</div>
+            </div>
+        </div>
+
+        <div class="app-grid">
+            
+            <!-- LEFT ACTION WORKSPACE PANELS -->
+            <div class="left-pane">
+                <!-- TOUCH KIOSK GRID -->
+                <div class="card">
+                    <h2>🎯 Touch Kiosk Terminal (Click Name to Punch)</h2>
+                    <div id="kioskContainer" class="kiosk-grid"></div>
+                </div>
+
+                <!-- NEW: AUTHORIZED ABSENCES / EXCUSES MANAGER REGISTRY PANEL -->
+                <div class="card">
+                    <h2>📝 Log Employee Absence / Excuse (Vacation & Leave)</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-size: 11px; font-weight:700; color: var(--text-muted);">Select Employee:</label>
+                            <select id="absenceEmployeeSelect">
+                                <option value="">-- Choose Worker --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight:700; color: var(--text-muted);">Absence Date:</label>
+                            <input type="date" id="absenceDateInput">
+                        </div>
+                    </div>
+                    <div class="form-inline" style="margin-bottom: 0;">
+                        <select id="absenceTypeSelect">
+                            <option value="🌴 Vacation Leave">🌴 Authorized Vacation</option>
+                            <option value="🤢 Sick Leave">🤢 Documented Medical / Sick Leave</option>
+                            <option value="🚨 Emergency Leave">🚨 Family / Urgent Emergency</option>
+                            <option value="🎉 Public Holiday">🎉 Authorized Public Holiday</option>
+                        </select>
+                        <button class="btn btn-warning" onclick="registerOfficialAbsence()">💾 Log Excuse</button>
+                    </div>
+                </div>
+
+                <!-- SYSTEM ROSTER CONFIGURATIONS -->
+                <div class="card" style="margin-bottom: 0;">
+                    <h2>👥 System Roster Setup</h2>
+                    <div class="form-inline">
+                        <input type="text" id="newEmployeeName" placeholder="Enter new worker full name..." autocomplete="off">
+                        <button class="btn btn-primary" onclick="createNewWorker()">+ Register</button>
+                    </div>
+                    <ul id="rosterListDisplay" class="roster-ui-list"></ul>
+                    <div class="admin-box">
+                        <span style="font-weight:600; color:var(--text-muted)">📋 Database Backups:</span>
+                        <div>
+                            <button class="btn" style="background:#64748b; color:white; padding:4px 8px; font-size:11px;" onclick="exportBackupData()">💾 Save Backup File</button>
+                            <button class="btn" style="background:#0284c7; color:white; padding:4px 8px; font-size:11px;" onclick="importBackupData()">📂 Load Backup File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANELS: REAL-TIME TICKING TIMERS MONITOR -->
+            <div class="right-pane">
+                <div class="card" style="height: calc(100% - 50px); margin-bottom:0;">
+                    <h2>📊 Live Attendance (Ticking Timers)</h2>
+                    
+                    <!-- TELEMETRY COUNTER ROW WIDGETS -->
+                    <div class="metrics-counter-bar">
+                        <div class="metric-mini-card">
+                            <span class="metric-label">Total Timecards Logged</span>
+                            <span id="statTotalDays" class="metric-value">0 Logs</span>
+                        </div>
+                        <div class="metric-mini-card">
+                            <span class="metric-label">Total Productive Hours</span>
+                            <span id="statTotalHours" class="metric-value">0.00 Hrs</span>
+                        </div>
+                    </div>
+
+                    <div id="dashboardTracker" class="dash-list"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM DATA HISTORY TIMECARD TABLE VIEW -->
+        <div class="analytics-section">
+            <div class="analytics-header">
+                <h3 style="margin:0; font-size:17px; color:#1e293b;">📋 Processed Shift Timecards & Excuse Ledger</h3>
+                <div>
+                    <button class="btn btn-success" style="margin-right:8px;" onclick="exportTableToCSV()">📥 Export Report Database to CSV (Excel)</button>
+                    <button class="btn btn-danger-outline" onclick="resetAllLogs()">Clear All Logs</button>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Target Shift Date</th>
+                            <th>Clocked In / Code</th>
+                            <th>Clocked Out / Code</th>
+                            <th>Calculated Elapsed Duration Summary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+                <div id="noDataMessage" class="no-data" style="display: none;">No finalized workforce tracking data inside active session registries.</div>
+            </div>
+        </div>
+
     </div>
-    <div class="topbar-right">
-      <div class="clock-badge" id="live-clock"></div>
-      <button class="btn btn-ghost" onclick="exportData()"><i class="ti ti-download"></i> Export</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('import-input').click()"><i class="ti ti-upload"></i> Import</button>
-      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(this)">
-      <button class="btn btn-primary" onclick="openAddModal()"><i class="ti ti-plus"></i> Add employee</button>
+
+    <script>
+        // Core Encapsulated Persistence Databases Storage
+        let employeesRoster = JSON.parse(localStorage.getItem('sys_roster')) || [];
+        let runningShifts = JSON.parse(localStorage.getItem('sys_active_shifts')) || {};
+        let databaseLogs = JSON.parse(localStorage.getItem('sys_logs')) || [];
+
+        // Global Loop Engine
+        function globalClockEngine() {
+            const now = new Date();
+            document.getElementById('digitalClock').innerText = now.toLocaleTimeString();
+            drawAnalogueClock();
+            updateLiveDashboardTimers();
+        }
+        setInterval(globalClockEngine, 1000);
+
+        window.onload = function() {
+            // Set current date string default option value on leave selector widget
+            document.getElementById('absenceDateInput').value = new Date().toISOString().slice(0, 10);
+            refreshInterface();
+            globalClockEngine();
+        };
+
+        function refreshInterface() {
+            renderKioskUI();
+            renderRosterListUI();
+            renderLogsTableUI();
+            updateLiveDashboardTimers();
+            calculateGlobalMetrics();
+            populateAbsenceDropdown();
+        }
+
+        // --- ARTISTIC CANVAS CLOCK GRAPHICS ---
+        function drawAnalogueClock() {
+            const canvas = document.getElementById('analogueClockCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const radius = canvas.height / 2;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save(); ctx.translate(radius, radius);
+            
+            ctx.beginPath(); ctx.arc(0, 0, radius - 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff'; ctx.fill();
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 3; ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(0, 0, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#1e293b'; ctx.fill();
+
+            const now = new Date();
+            const hrPos = ((now.getHours() % 12) * Math.PI / 6) + (now.getMinutes() * Math.PI / (6 * 60));
+            const minPos = (now.getMinutes() * Math.PI / 30);
+            const secPos = (now.getSeconds() * Math.PI / 30);
+
+            drawClockHand(ctx, hrPos, radius * 0.5, 3.5, '#1e293b');
+            drawClockHand(ctx, minPos, radius * 0.7, 2, '#475569');
+            drawClockHand(ctx, secPos, radius * 0.8, 1, '#ef4444');
+            ctx.restore();
+        }
+
+        function drawClockHand(ctx, pos, length, width, color) {
+            ctx.beginPath(); ctx.lineWidth = width; ctx.lineCap = "round"; ctx.strokeStyle = color;
+            ctx.moveTo(0, 0); ctx.rotate(pos); ctx.lineTo(0, -length); ctx.stroke(); ctx.rotate(-pos);
+        }
+
+        // --- INTERACTIVE TOUCH KIOSK MACHINE LOGIC ---
+        function renderKioskUI() {
+            const kiosk = document.getElementById('kioskContainer');
+            kiosk.innerHTML = '';
+            if (employeesRoster.length === 0) {
+                kiosk.innerHTML = `<div class="no-data" style="grid-column: 1/-1;">Roster Database Empty. Add workers below to display profiles!</div>`;
+                return;
+            }
+            employeesRoster.sort().forEach(worker => {
+                const block = document.createElement('div');
+                const isClockedIn = !!runningShifts[worker];
+
+                if (isClockedIn) {
+                    block.className = "employee-block block-in";
+                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">⏱️ Working</div><div class="hover-action-text">🛑 Clock Out</div>`;
+                    block.onclick = () => processPunchOut(worker);
+                    const advBtnIn = document.createElement('button');
+                    advBtnIn.innerHTML = '💰' + (getAdvTotal(worker) > 0 ? ` <span class="adv-pill-badge">$${getAdvTotal(worker).toFixed(0)}</span>` : '');
+                    advBtnIn.title = 'Advances'; advBtnIn.style.cssText = 'margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;';
+                    advBtnIn.onclick = (e) => { e.stopPropagation(); openAdvModal(worker); };
+                    block.appendChild(advBtnIn);
+                } else {
+                    block.className = "employee-block block-out";
+                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">💤 Off Clock</div><div class="hover-action-text">⚡ Clock In</div>`;
+                    block.onclick = () => processPunchIn(worker);
+                    const advBtnOut = document.createElement('button');
+                    advBtnOut.innerHTML = '💰' + (getAdvTotal(worker) > 0 ? ` <span class="adv-pill-badge">$${getAdvTotal(worker).toFixed(0)}</span>` : '');
+                    advBtnOut.title = 'Advances'; advBtnOut.style.cssText = 'margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;';
+                    advBtnOut.onclick = (e) => { e.stopPropagation(); openAdvModal(worker); };
+                    block.appendChild(advBtnOut);
+                }
+                kiosk.appendChild(block);
+            });
+        }
+
+        function processPunchIn(name) {
+            runningShifts[name] = new Date().toISOString();
+            saveToDisk('sys_active_shifts', runningShifts);
+            refreshInterface();
+        }
+
+        function processPunchOut(name) {
+            const end = new Date();
+            const start = new Date(runningShifts[name]);
+            const elapsedMilliseconds = end - start;
+
+            const record = {
+                id: "SHIFT-" + Date.now(),
+                type: "SHIFT_RECORD",
+                employee: name,
+                date: start.toLocaleDateString(),
+                inTime: start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+                outTime: end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+                durationMs: elapsedMilliseconds
+            };
+
+            databaseLogs.unshift(record);
+            saveToDisk('sys_logs', databaseLogs);
+            delete runningShifts[name];
+            saveToDisk('sys_active_shifts', runningShifts);
+            refreshInterface();
+        }
+
+        // --- NEW: OFFICIAL AUTHORIZED LEAVE/ABSENCES REGISTRY ENGINE ---
+        function populateAbsenceDropdown() {
+            const dropdown = document.getElementById('absenceEmployeeSelect');
+            const currentSel = dropdown.value;
+            dropdown.innerHTML = '<option value="">-- Choose Worker --</option>';
+            employeesRoster.sort().forEach(worker => {
+                const opt = document.createElement('option');
+                opt.value = worker; opt.innerText = worker;
+                dropdown.appendChild(opt);
+            });
+            dropdown.value = currentSel;
+        }
+
+        function registerOfficialAbsence() {
+            const worker = document.getElementById('absenceEmployeeSelect').value;
+            const rawDate = document.getElementById('absenceDateInput').value;
+            const absenceType = document.getElementById('absenceTypeSelect').value;
+
+            if (!worker) { alert("Please select an employee name profile to attach the excuse."); return; }
+            if (!rawDate) { alert("Please select a target date profile for the absence ledger record."); return; }
+
+            // Split date array to display in native locale string layouts uniformly
+            const dateObj = new Date(rawDate + "T00:00:00");
+            
+            const absenceRecord = {
+                id: "ABSENCE-" + Date.now(),
+                type: "EXCUSED_ABSENCE",
+                employee: worker,
+                date: dateObj.toLocaleDateString(),
+                inTime: "EXCUSED",
+                outTime: "EXCUSED",
+                durationMs: 0, // Absence records carry zero productive runtime hours internally
+                absenceLabel: absenceType
+            };
+
+            // Inject directly into payroll database ledger
+            databaseLogs.unshift(absenceRecord);
+            saveToDisk('sys_logs', databaseLogs);
+            refreshInterface();
+            alert(`Excuse record logged successfully for ${worker}!`);
+        }
+
+        // --- TIMERS ATTENDANCE TICKING DASHBOARD PANEL VIEW ---
+        function updateLiveDashboardTimers() {
+            const container = document.getElementById('dashboardTracker');
+            if (!container) return; container.innerHTML = '';
+
+            if (employeesRoster.length === 0) {
+                container.innerHTML = `<div class="no-data">No active recorded profiles.</div>`; return;
+            }
+
+            employeesRoster.sort().forEach(worker => {
+                const row = document.createElement('div');
+                if (runningShifts[worker]) {
+                    const startTime = new Date(runningShifts[worker]);
+                    const diffMs = new Date() - startTime;
+                    const s = Math.floor((diffMs / 1000) % 60);
+                    const m = Math.floor((diffMs / (1000 * 60)) % 60);
+                    const h = Math.floor(diffMs / (1000 * 60 * 60));
+
+                    row.className = "dash-row status-working";
+                    row.innerHTML = `<span><span class="dot dot-green"></span><strong>${escapeHtml(worker)}</strong></span> 
+                                     <span class="timer-badge">⏱️ ${h < 10 ? '0'+h : h}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s</span>`;
+                } else {
+                    row.className = "dash-row status-out";
+                    row.innerHTML = `<span><span class="dot dot-gray"></span>${escapeHtml(worker)}</span> <span class="out-badge">Off Work</span>`;
+                }
+                container.appendChild(row);
+            });
+        }
+
+        // --- MATH CALCULATIONS ANALYTICS PARSER ---
+        function formatDurationString(totalMs, isAbsence, absenceText) {
+            if (isAbsence) return `Authorized Absence: [${absenceText}]`;
+            if (!totalMs || isNaN(totalMs)) return "0 Days, 0 Hours, 0 Mins";
+            
+            let totalSeconds = Math.floor(totalMs / 1000);
+            let totalMinutes = Math.floor(totalSeconds / 60);
+            let totalHours = Math.floor(totalMinutes / 60);
+            let totalDays = Math.floor(totalHours / 24);
+
+            let remainingHours = totalHours % 24;
+            let remainingMinutes = totalMinutes % 60;
+
+            let output = [];
+            output.push(`${totalDays} Day${totalDays !== 1 ? 's' : ''}`);
+            output.push(`${remainingHours} Hr${remainingHours !== 1 ? 's' : ''}`);
+            output.push(`${remainingMinutes} Min${remainingMinutes !== 1 ? 's' : ''}`);
+            
+            return output.join(', ');
+        }
+
+        function calculateGlobalMetrics() {
+            let aggregatedMs = 0;
+            databaseLogs.forEach(log => { aggregatedMs += log.durationMs || 0; });
+            let fractionalTotalHours = (aggregatedMs / (1000 * 60 * 60)).toFixed(2);
+
+            document.getElementById('statTotalDays').innerText = `${databaseLogs.length} Entry Logs`;
+            document.getElementById('statTotalHours').innerText = `${fractionalTotalHours} Hrs`;
+        }
+
+        // --- RENDER HISTORY TIMECARDS TABLE SHEET ---
+        function renderLogsTableUI() {
+            const tbody = document.getElementById('logTableBody');
+            const noData = document.getElementById('noDataMessage');
+            tbody.innerHTML = '';
+
+            if (databaseLogs.length === 0) { noData.style.display = 'block'; return; }
+            noData.style.display = 'none';
+
+            databaseLogs.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const isAbsence = item.type === "EXCUSED_ABSENCE";
+                const humanReadableTime = formatDurationString(item.durationMs, isAbsence, item.absenceLabel);
+                
+                // CORE LOGIC METRIC: Check if structural work timing hits standard 9-Hours workday ceiling threshold
+                const totalHoursDecimal = (item.durationMs || 0) / (1000 * 60 * 60);
+                let badgeStyleClass = "badge-standard";
+                let textModifier = humanReadableTime;
+
+                if (isAbsence) {
+                    badgeStyleClass = "badge-absence-excuse";
+                } else if (totalHoursDecimal >= 9.0) {
+                    badgeStyleClass = "badge-target-full";
+                    textModifier = `⭐ Complete Day (9+ Hrs) -> [${humanReadableTime}]`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${escapeHtml(item.employee)}</strong></td>
+                    <td>${item.date}</td>
+                    <td><span style="${isAbsence ? 'color: var(--warning); font-weight:700;' : ''}">${item.inTime}</span></td>
+                    <td><span style="${isAbsence ? 'color: var(--warning); font-weight:700;' : ''}">${item.outTime}</span></td>
+                    <td><span class="${badgeStyleClass}">${textModifier}</span></td>
+                    <td><button class="btn-danger-outline" style="padding:2px 6px; font-size:11px;" onclick="deleteSingleTimecard(${index})">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- EXCEL SPREADSHEETS REPORTS CSV GENERATOR EXPORT PIPELINE ---
+        function exportTableToCSV() {
+            if (databaseLogs.length === 0) { alert("Export Database contains no logs."); return; }
+            let csvLines = ["Employee Name,Entry Type,Target Date,Clocked In Code,Clocked Out Code,Decimal Hours Productive,Formatted Duration Summary Description"];
+
+            databaseLogs.forEach(log => {
+                const isAbsence = log.type === "EXCUSED_ABSENCE";
+                let decimalHrs = (isAbsence) ? "0.00" : ((log.durationMs || 0) / (1000 * 60 * 60)).toFixed(2);
+                let textSummary = formatDurationString(log.durationMs, isAbsence, log.absenceLabel).replace(/,/g, " -");
+                
+                let lineRow = [
+                    `"${log.employee.replace(/"/g, '""')}"`,
+                    `"${log.type}"`,
+                    `"${log.date}"`,
+                    `"${log.inTime}"`,
+                    `"${log.outTime}"`,
+                    `"${decimalHrs}"`,
+                    `"${textSummary}"`
+                ];
+                csvLines.push(lineRow.join(","));
+            });
+
+            const csvDataBlob = new Blob([csvLines.join("\n")], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(csvDataBlob);
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", url);
+            anchor.setAttribute("download", `Workforce_Kiosk_FullPayrollReport.csv`);
+            document.body.appendChild(anchor); anchor.click(); anchor.remove();
+        }
+
+        // --- ADMIN SYSTEM COMMAND CONFIGS MANAGER ---
+        function createNewWorker() {
+            const input = document.getElementById('newEmployeeName');
+            const name = input.value.trim();
+            if (!name) return;
+            if (employeesRoster.includes(name)) { alert("Worker profile exists."); return; }
+            employeesRoster.push(name);
+            saveToDisk('sys_roster', employeesRoster);
+            input.value = ''; refreshInterface();
+        }
+
+        function removeWorker(name) {
+            if (confirm(`Completely purge worker profile ${name}?`)) {
+                employeesRoster = employeesRoster.filter(e => e !== name);
+                saveToDisk('sys_roster', employeesRoster);
+                if (runningShifts[name]) { delete runningShifts[name]; saveToDisk('sys_active_shifts', runningShifts); }
+                refreshInterface();
+            }
+        }
+
+        function renderRosterListUI() {
+            const list = document.getElementById('rosterListDisplay'); list.innerHTML = '';
+            employeesRoster.sort().forEach(worker => {
+                const li = document.createElement('li'); li.className = 'roster-ui-item';
+                li.innerHTML = `<span><strong>${escapeHtml(worker)}</strong></span><button class="btn-danger-outline" style="border:none;" onclick="removeWorker('${escapeHtml(worker)}')">❌ Delete</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        function deleteSingleTimecard(index) {
+            if (confirm("Permanently erase this profile log record line?")) {
+                databaseLogs.splice(index, 1); saveToDisk('sys_logs', databaseLogs); refreshInterface();
+            }
+        }
+
+        function resetAllLogs() {
+            if (confirm("Danger Notice: Erase ALL operational spreadsheet shift sheets records inside database profile histories?")) {
+                databaseLogs = []; saveToDisk('sys_logs', databaseLogs); refreshInterface();
+            }
+        }
+
+        function saveToDisk(key, objectData) { localStorage.setItem(key, JSON.stringify(objectData)); }
+
+        function exportBackupData() {
+            const state = { roster: employeesRoster, shifts: runningShifts, logs: databaseLogs };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SystemStateBackup.json");
+            document.body.appendChild(a); a.click(); a.remove();
+        }
+
+        function importBackupData() {
+            const jsonStr = prompt("Paste contents from backup file here:"); if (!jsonStr) return;
+            try {
+                const p = JSON.parse(jsonStr);
+                if (p.roster && p.shifts && p.logs) {
+                    employeesRoster = p.roster; runningShifts = p.shifts; databaseLogs = p.logs;
+                    saveToDisk('sys_roster', employeesRoster); saveToDisk('sys_active_shifts', runningShifts); saveToDisk('sys_logs', databaseLogs);
+                    refreshInterface(); alert("Restored Successfully!");
+                }
+            } catch(e) { alert("Invalid format profiles."); }
+        }
+
+
+        // ── ADVANCES MODULE ─────────────────────────────────────────
+        let advancesDB = JSON.parse(localStorage.getItem('sys_advances')) || {};
+        let currentAdvWorker = null;
+
+        function saveAdvances() { localStorage.setItem('sys_advances', JSON.stringify(advancesDB)); }
+
+        function getAdvList(name) { return advancesDB[name] || []; }
+
+        function getAdvTotal(name) {
+            return getAdvList(name).reduce((s, x) => s + Number(x.amount), 0);
+        }
+
+        function openAdvModal(name) {
+            currentAdvWorker = name;
+            document.getElementById('advModalName').innerText = name;
+            document.getElementById('advDate').value = new Date().toISOString().slice(0,10);
+            document.getElementById('advAmount').value = '';
+            document.getElementById('advNote').value = '';
+            renderAdvModal();
+            document.getElementById('advModal').classList.add('open');
+            setTimeout(() => document.getElementById('advAmount').focus(), 50);
+        }
+
+        function closeAdvModal() {
+            document.getElementById('advModal').classList.remove('open');
+            currentAdvWorker = null;
+        }
+
+        document.getElementById('advModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAdvModal();
+        });
+
+        function renderAdvModal() {
+            if (!currentAdvWorker) return;
+            const list = getAdvList(currentAdvWorker);
+            const total = getAdvTotal(currentAdvWorker);
+            document.getElementById('advModalTotal').innerText = '$' + total.toFixed(2);
+            document.getElementById('advSettleRow').style.display = total > 0 ? 'flex' : 'none';
+
+            const listEl = document.getElementById('advModalList');
+            listEl.innerHTML = '';
+            if (!list.length) {
+                listEl.innerHTML = '<div style="font-size:13px;color:#94a3b8;padding:4px 6px">No advances recorded yet.</div>';
+                return;
+            }
+            [...list].reverse().forEach((adv, ri) => {
+                const realIdx = list.length - 1 - ri;
+                const d = document.createElement('div');
+                d.className = 'adv-entry';
+                const dateStr = new Date(adv.date).toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+                d.innerHTML = `
+                    <div class="adv-entry-left">
+                        <span class="adv-entry-amount">$${Number(adv.amount).toFixed(2)}</span>
+                        ${adv.note ? `<span class="adv-entry-note">${escapeHtml(adv.note)}</span>` : ''}
+                        <span class="adv-entry-date">${dateStr}</span>
+                    </div>
+                    <button class="adv-del-btn" onclick="deleteAdvance(${realIdx})">✕ Remove</button>`;
+                listEl.appendChild(d);
+            });
+        }
+
+        function addAdvance() {
+            const amount = parseFloat(document.getElementById('advAmount').value);
+            if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+            const date = document.getElementById('advDate').value;
+            const note = document.getElementById('advNote').value.trim();
+            if (!advancesDB[currentAdvWorker]) advancesDB[currentAdvWorker] = [];
+            advancesDB[currentAdvWorker].push({ amount, date: new Date(date).getTime() || Date.now(), note });
+            document.getElementById('advAmount').value = '';
+            document.getElementById('advNote').value = '';
+            saveAdvances();
+            renderAdvModal();
+            refreshInterface();
+        }
+
+        function deleteAdvance(idx) {
+            if (!confirm('Remove this advance entry?')) return;
+            advancesDB[currentAdvWorker].splice(idx, 1);
+            saveAdvances();
+            renderAdvModal();
+            refreshInterface();
+        }
+
+        function settleAdvances() {
+            if (!confirm('Mark all advances for ' + currentAdvWorker + ' as settled and reset to $0?')) return;
+            advancesDB[currentAdvWorker] = [];
+            saveAdvances();
+            renderAdvModal();
+            refreshInterface();
+        }
+        // ── END ADVANCES MODULE ──────────────────────────────────────
+
+        document.getElementById('newEmployeeName').addEventListener('keypress', function(e) { if (e.key === 'Enter') { createNewWorker(); } });
+        function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    </script>
+
+    <!-- ADVANCES MODAL -->
+    <div class="modal-overlay" id="advModal">
+        <div class="modal-box">
+            <h3>💰 Advances — <span id="advModalName"></span></h3>
+
+            <div class="adv-total-bar">
+                <span class="adv-total-label">Total Advanced</span>
+                <span class="adv-total-val" id="advModalTotal">$0.00</span>
+            </div>
+
+            <div class="adv-list" id="advModalList"></div>
+
+            <div class="adv-add-form">
+                <div class="adv-form-row">
+                    <div>
+                        <label>Amount ($)</label>
+                        <input type="number" id="advAmount" min="0" step="0.01" placeholder="0.00" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;">
+                    </div>
+                    <div>
+                        <label>Date</label>
+                        <input type="date" id="advDate" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;">
+                    </div>
+                </div>
+                <label>Note (optional)</label>
+                <input type="text" id="advNote" placeholder="e.g. Rent, emergency..." style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:10px;">
+                <button class="adv-add-btn" onclick="addAdvance()">+ Add Advance</button>
+            </div>
+
+            <div class="adv-settle-row" id="advSettleRow" style="display:none">
+                <span class="adv-settle-label">✅ Mark all as settled (reset to $0)</span>
+                <button class="adv-settle-btn" onclick="settleAdvances()">Settled & Paid</button>
+            </div>
+
+            <button class="modal-close-btn" onclick="closeAdvModal()">Close</button>
+        </div>
     </div>
-  </div>
 
-  <div class="import-banner" id="import-banner">
-    <div><h3><i class="ti ti-transfer-in"></i> Migrating from your NAS?</h3>
-    <p>Click Import and select your <code style="background:rgba(79,142,247,0.15);padding:1px 5px;border-radius:4px;font-family:monospace">timetracker_data.json</code> to restore all data.</p></div>
-    <button class="btn btn-ghost btn-sm" onclick="dismissBanner()"><i class="ti ti-x"></i> Dismiss</button>
-  </div>
-
-  <div class="emp-grid" id="emp-grid"></div>
-
-  <div class="punch-wrap" id="punch-wrap">
-    <div class="punch-header">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="avatar" id="punch-av"></div>
-        <div><div class="punch-name" id="punch-name"></div><div class="punch-sub" id="punch-sub"></div></div>
-      </div>
-      <div class="punch-btns">
-        <button class="btn-in" id="btn-in" onclick="punchIn()"><i class="ti ti-login"></i> Clock In</button>
-        <button class="btn-out" id="btn-out" onclick="punchOut()"><i class="ti ti-logout"></i> Clock Out</button>
-      </div>
-    </div>
-    <div class="log-list" id="log-list"></div>
-  </div>
-
-  <div class="summary">
-    <div class="stat"><div class="stat-label">Total employees</div><div class="stat-val" id="s-total">0</div></div>
-    <div class="stat"><div class="stat-label">Currently in</div><div class="stat-val" id="s-in" style="color:var(--green)">0</div></div>
-    <div class="stat"><div class="stat-label">Total hours today</div><div class="stat-val" id="s-hrs">0.0h</div></div>
-    <div class="stat"><div class="stat-label">Total advances</div><div class="stat-val" id="s-adv" style="color:var(--amber)">$0</div></div>
-  </div>
-
-  <div class="table-wrap">
-    <div class="table-hdr"><span>Today's log</span><span id="today-date" style="font-size:11px;color:var(--text3);font-weight:400"></span></div>
-    <table><thead><tr><th>Employee</th><th>Status</th><th>Clock in</th><th>Clock out</th><th>Hours</th><th>Advances</th></tr></thead>
-    <tbody id="log-table"></tbody></table>
-  </div>
-</div>
-
-<!-- Employee add/edit/delete modal -->
-<div class="modal-bg" id="modal-bg">
-  <div class="modal">
-    <h2 id="modal-title"></h2>
-    <div id="del-box" class="del-box" style="display:none"></div>
-    <div id="modal-fields">
-      <div class="field"><label>Full name</label><input id="f-name" type="text" placeholder="e.g. Sarah Chen"></div>
-      <div class="field"><label>Role</label><input id="f-role" type="text" placeholder="e.g. Designer"></div>
-      <div class="field"><label>Color</label><div class="color-picks" id="color-picks"></div></div>
-    </div>
-    <div class="modal-btns" id="modal-btns"></div>
-  </div>
-</div>
-
-<!-- Advances modal -->
-<div class="modal-bg" id="adv-modal-bg">
-  <div class="modal">
-    <h2><i class="ti ti-cash" style="color:var(--amber)"></i> Advances — <span id="adv-emp-name"></span></h2>
-
-    <div class="adv-total-box">
-      <span class="adv-total-label">Total advanced</span>
-      <span class="adv-total-val" id="adv-total">$0.00</span>
-    </div>
-
-    <div class="adv-list" id="adv-list"></div>
-
-    <!-- Add new advance -->
-    <div class="add-adv-row">
-      <div class="field" style="margin:0"><label>Amount ($)</label><input id="adv-amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
-      <div class="field" style="margin:0"><label>Date</label><input id="adv-date" type="date"></div>
-    </div>
-    <div class="field"><label>Note (optional)</label><input id="adv-note" type="text" placeholder="e.g. Rent, emergency..."></div>
-    <button class="btn btn-sm" style="background:var(--amber);color:#1a0f00;font-weight:600" onclick="addAdvance()"><i class="ti ti-plus"></i> Add advance</button>
-
-    <div class="settle-row" id="settle-row" style="display:none">
-      <span class="settle-label"><i class="ti ti-check"></i> Mark all as settled (reset to $0)</span>
-      <button class="btn-settle" onclick="settleAdvances()">Settled & paid</button>
-    </div>
-
-    <div class="modal-btns"><button class="btn-cancel" onclick="closeAdvModal()">Close</button></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-const LS_KEY='timetracker_v2';
-const COLORS=[
-  {bg:'#1e3a5f',color:'#93c5fd',dot:'#4f8ef7'},
-  {bg:'#1a3a2a',color:'#6ee7b7',dot:'#34d399'},
-  {bg:'#3b2a1a',color:'#fcd34d',dot:'#fbbf24'},
-  {bg:'#3a1a2a',color:'#f9a8d4',dot:'#ec4899'},
-  {bg:'#2a1a3a',color:'#c4b5fd',dot:'#8b5cf6'},
-  {bg:'#1a2a3a',color:'#7dd3fc',dot:'#38bdf8'},
-  {bg:'#2a3a1a',color:'#a3e635',dot:'#84cc16'},
-  {bg:'#3a2a1a',color:'#fb923c',dot:'#f97316'},
-];
-const DEF={
-  employees:[
-    {id:1,name:'Sarah Chen',role:'Frontend Dev',ci:0},
-    {id:2,name:'Marcus Obi',role:'Backend Dev',ci:1},
-    {id:3,name:'Lena Muller',role:'Designer',ci:2},
-    {id:4,name:'James Park',role:'QA Engineer',ci:3},
-  ],
-  nextId:5,state:{},advances:{},lastDate:'',bannerDismissed:false
-};
-
-let data,sel=null,advEmpId=null,modalMode=null,editTarget=null,chosenColor=0;
-
-function loadData(){
-  try{const r=localStorage.getItem(LS_KEY);data=r?JSON.parse(r):JSON.parse(JSON.stringify(DEF));}
-  catch(e){data=JSON.parse(JSON.stringify(DEF));}
-  if(!data.advances)data.advances={};
-  const today=new Date().toISOString().slice(0,10);
-  if(data.lastDate!==today){
-    const mid=new Date();mid.setHours(0,0,0,0);
-    Object.keys(data.state).forEach(id=>{
-      const s=data.state[id];
-      if(s.in&&s.inTime){s.total=(s.total||0)+(mid.getTime()-s.inTime);if(s.logs&&s.logs.length)s.logs[s.logs.length-1].out=mid.getTime();s.in=false;s.inTime=null;}
-    });
-    data.state={};data.lastDate=today;
-  }
-  data.employees.forEach(e=>{
-    const k=String(e.id);
-    if(!data.state[k])data.state[k]={in:false,inTime:null,logs:[],total:0};
-    if(!data.advances[k])data.advances[k]=[];
-  });
-  save();
-}
-function save(){localStorage.setItem(LS_KEY,JSON.stringify(data));}
-
-function exportData(){
-  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='timetracker_data_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-  toast('✓ Exported');
-}
-function importData(input){
-  const file=input.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const imp=JSON.parse(e.target.result);if(!imp.employees)throw 0;
-      const ns={};if(imp.state)Object.keys(imp.state).forEach(k=>{ns[String(k)]=imp.state[k];});
-      data.employees=imp.employees;
-      data.nextId=imp.nextId||Math.max(...imp.employees.map(e=>e.id),0)+1;
-      data.state=ns;data.advances=imp.advances||{};
-      data.lastDate=imp.lastDate||new Date().toISOString().slice(0,10);
-      data.employees.forEach(e=>{
-        const k=String(e.id);
-        if(!data.state[k])data.state[k]={in:false,inTime:null,logs:[],total:0};
-        if(!data.advances[k])data.advances[k]=[];
-      });
-      save();renderAll();dismissBanner();
-      toast('✓ '+data.employees.length+' employees restored','ok');
-    }catch(e){toast('✗ Invalid file');}
-  };
-  r.readAsText(file);input.value='';
-}
-function dismissBanner(){document.getElementById('import-banner').style.display='none';data.bannerDismissed=true;save();}
-
-function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
-function fmtT(ts){return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-function fmtD(ts){return new Date(ts).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});}
-function fmtMs(ms){
-  if(ms<=0)return'0s';
-  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
-  if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';
-  if(m>0)return m+'m '+String(s).padStart(2,'0')+'s';
-  return s+'s';
-}
-function totalMs(id){const s=data.state[String(id)];if(!s)return 0;let ms=s.total||0;if(s.in&&s.inTime)ms+=Date.now()-s.inTime;return ms;}
-function getState(id){return data.state[String(id)]||{in:false,inTime:null,logs:[],total:0};}
-function getAdvances(id){return data.advances[String(id)]||[];}
-function advTotal(id){return getAdvances(id).reduce((a,x)=>a+Number(x.amount),0);}
-function fmt$(n){return'$'+Number(n).toFixed(2);}
-
-function toast(msg,cls=''){
-  const el=document.getElementById('toast');el.textContent=msg;
-  el.className='toast show '+cls;clearTimeout(el._t);
-  el._t=setTimeout(()=>{el.className='toast';},2800);
-}
-
-function renderAll(){renderCards();renderPunch();renderSummary();renderTable();}
-
-function renderCards(){
-  const g=document.getElementById('emp-grid');g.innerHTML='';
-  data.employees.forEach(emp=>{
-    const s=getState(emp.id),c=COLORS[emp.ci]||COLORS[0];
-    const ms=totalMs(emp.id),hrs=(ms/3600000).toFixed(1);
-    const adv=advTotal(emp.id);
-    const div=document.createElement('div');
-    div.className='emp-card'+(sel===emp.id?' selected':'');
-    div.onclick=e=>{if(!e.target.closest('.card-actions'))selectEmp(emp.id);};
-    div.innerHTML=`
-      <div class="card-actions">
-        <div class="card-btn adv" title="Advances" onclick="openAdvModal(${emp.id})"><i class="ti ti-cash"></i></div>
-        <div class="card-btn" title="Edit" onclick="openEditModal(${emp.id})"><i class="ti ti-pencil"></i></div>
-        <div class="card-btn del" title="Delete" onclick="openDelModal(${emp.id})"><i class="ti ti-trash"></i></div>
-      </div>
-      <div class="emp-top">
-        <div class="avatar" style="background:${c.bg};color:${c.color}">${ini(emp.name)}</div>
-        <div><div class="emp-name">${emp.name}</div><div class="emp-role">${emp.role}</div></div>
-      </div>
-      <span class="badge ${s.in?'badge-in':'badge-out'}"><span class="badge-dot"></span>${s.in?'Clocked in':'Clocked out'}</span>
-      <div class="emp-hours">${hrs}h</div>
-      <div class="emp-hours-label">today</div>
-      ${adv>0?`<div class="adv-pill"><i class="ti ti-arrow-down-circle"></i> ${fmt$(adv)} advanced</div>`:''}`;
-    g.appendChild(div);
-  });
-}
-
-function selectEmp(id){sel=id;renderCards();renderPunch();}
-
-function renderPunch(){
-  if(!sel){document.getElementById('punch-wrap').classList.remove('visible');return;}
-  const emp=data.employees.find(e=>e.id===sel);
-  if(!emp){document.getElementById('punch-wrap').classList.remove('visible');sel=null;return;}
-  const s=getState(sel),c=COLORS[emp.ci]||COLORS[0];
-  document.getElementById('punch-wrap').classList.add('visible');
-  const av=document.getElementById('punch-av');
-  Object.assign(av.style,{background:c.bg,color:c.color,width:'38px',height:'38px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'600',flexShrink:'0'});
-  av.textContent=ini(emp.name);
-  document.getElementById('punch-name').textContent=emp.name;
-  const sub=document.getElementById('punch-sub');
-  if(s.in&&s.inTime)sub.textContent='Clocked in at '+fmtT(s.inTime);
-  else if(s.logs&&s.logs.length&&s.logs[s.logs.length-1].out)sub.textContent='Last out at '+fmtT(s.logs[s.logs.length-1].out);
-  else sub.textContent=emp.role;
-  document.getElementById('btn-in').disabled=s.in;
-  document.getElementById('btn-out').disabled=!s.in;
-  renderLog();
-}
-
-function renderLog(){
-  if(!sel)return;
-  const s=getState(sel),list=document.getElementById('log-list');list.innerHTML='';
-  if(!s.logs||!s.logs.length){list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:4px 8px">No entries yet.</div>';return;}
-  [...s.logs].reverse().forEach(l=>{
-    const d=document.createElement('div');d.className='log-item';
-    d.innerHTML=`<div style="display:flex;gap:14px;align-items:center">
-      <div style="display:flex;align-items:center;gap:5px;color:var(--green)"><i class="ti ti-login"></i><span>${fmtT(l.in)}</span></div>
-      ${l.out?`<div style="display:flex;align-items:center;gap:5px;color:var(--red)"><i class="ti ti-logout"></i><span>${fmtT(l.out)}</span></div>`:'<span style="font-size:12px;color:var(--green);font-weight:600">Active</span>'}
-    </div><div class="log-dur">${l.out?fmtMs(l.out-l.in):fmtMs(Date.now()-l.in)}</div>`;
-    list.appendChild(d);
-  });
-}
-
-function renderSummary(){
-  const tot=data.employees.length,inC=data.employees.filter(e=>getState(e.id).in).length;
-  let tms=0,tadv=0;
-  data.employees.forEach(e=>{tms+=totalMs(e.id);tadv+=advTotal(e.id);});
-  document.getElementById('s-total').textContent=tot;
-  document.getElementById('s-in').textContent=inC;
-  document.getElementById('s-hrs').textContent=(tms/3600000).toFixed(1)+'h';
-  document.getElementById('s-adv').textContent=fmt$(tadv);
-}
-
-function renderTable(){
-  const tb=document.getElementById('log-table');tb.innerHTML='';
-  data.employees.forEach(emp=>{
-    const s=getState(emp.id),c=COLORS[emp.ci]||COLORS[0];
-    const ms=totalMs(emp.id),hrs=(ms/3600000).toFixed(2),ot=ms>8*3600000;
-    const fi=s.logs&&s.logs.length?fmtT(s.logs[0].in):'—';
-    const lo=!s.in&&s.logs&&s.logs.length&&s.logs[s.logs.length-1].out?fmtT(s.logs[s.logs.length-1].out):'—';
-    const adv=advTotal(emp.id);
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><div style="display:flex;align-items:center;gap:8px">
-        <div style="width:30px;height:30px;border-radius:50%;background:${c.bg};color:${c.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${ini(emp.name)}</div>
-        <div><div style="font-weight:600;font-size:13px">${emp.name}</div><div style="font-size:11px;color:var(--text3)">${emp.role}</div></div>
-      </div></td>
-      <td><span class="badge ${s.in?'badge-in':'badge-out'}"><span class="badge-dot"></span>${s.in?'In':'Out'}</span></td>
-      <td>${fi}</td><td>${lo}</td>
-      <td class="${ot?'ot':''}">${hrs}h${ot?' <span style="font-size:10px">(OT)</span>':''}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${adv>0?'var(--amber)':'var(--text3)'}">${adv>0?fmt$(adv):'—'}</td>`;
-    tb.appendChild(tr);
-  });
-}
-
-function punchIn(){
-  if(!sel)return;const s=getState(sel);if(s.in)return;
-  const now=Date.now();s.in=true;s.inTime=now;if(!s.logs)s.logs=[];
-  s.logs.push({in:now,out:null});data.state[String(sel)]=s;save();renderAll();
-}
-function punchOut(){
-  if(!sel)return;const s=getState(sel);if(!s.in)return;
-  const now=Date.now();s.total=(s.total||0)+(now-s.inTime);
-  if(s.logs&&s.logs.length)s.logs[s.logs.length-1].out=now;
-  s.in=false;s.inTime=null;data.state[String(sel)]=s;save();renderAll();
-}
-
-/* ── Advances modal ─────────────────────────────────── */
-function openAdvModal(id){
-  advEmpId=id;
-  const emp=data.employees.find(e=>e.id===id);
-  document.getElementById('adv-emp-name').textContent=emp?emp.name:'';
-  document.getElementById('adv-date').value=new Date().toISOString().slice(0,10);
-  document.getElementById('adv-amount').value='';
-  document.getElementById('adv-note').value='';
-  renderAdvList();
-  document.getElementById('adv-modal-bg').classList.add('open');
-  setTimeout(()=>document.getElementById('adv-amount').focus(),50);
-}
-function closeAdvModal(){document.getElementById('adv-modal-bg').classList.remove('open');advEmpId=null;}
-document.getElementById('adv-modal-bg').addEventListener('click',e=>{if(e.target===document.getElementById('adv-modal-bg'))closeAdvModal();});
-
-function renderAdvList(){
-  if(!advEmpId)return;
-  const advances=getAdvances(advEmpId);
-  const total=advTotal(advEmpId);
-  document.getElementById('adv-total').textContent=fmt$(total);
-  document.getElementById('settle-row').style.display=total>0?'flex':'none';
-  const list=document.getElementById('adv-list');list.innerHTML='';
-  if(!advances.length){
-    list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:4px 6px">No advances yet.</div>';
-    return;
-  }
-  [...advances].reverse().forEach((adv,ri)=>{
-    const realIdx=advances.length-1-ri;
-    const d=document.createElement('div');d.className='adv-item';
-    d.innerHTML=`
-      <div class="adv-info">
-        <div style="font-weight:600">${fmt$(adv.amount)}</div>
-        ${adv.note?`<div class="adv-note">${adv.note}</div>`:''}
-        <div class="adv-date">${fmtD(adv.date)}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="adv-amount">${fmt$(adv.amount)}</span>
-        <button class="adv-del" onclick="deleteAdv(${realIdx})" title="Remove"><i class="ti ti-x"></i></button>
-      </div>`;
-    list.appendChild(d);
-  });
-}
-
-function addAdvance(){
-  const amount=parseFloat(document.getElementById('adv-amount').value);
-  if(!amount||amount<=0){toast('Enter a valid amount');return;}
-  const date=document.getElementById('adv-date').value;
-  const note=document.getElementById('adv-note').value.trim();
-  const k=String(advEmpId);
-  if(!data.advances[k])data.advances[k]=[];
-  data.advances[k].push({amount,date:new Date(date).getTime()||Date.now(),note});
-  document.getElementById('adv-amount').value='';
-  document.getElementById('adv-note').value='';
-  save();renderAdvList();renderAll();
-  toast('✓ Advance of '+fmt$(amount)+' added','ok');
-}
-
-function deleteAdv(idx){
-  const k=String(advEmpId);
-  data.advances[k].splice(idx,1);
-  save();renderAdvList();renderAll();
-  toast('Entry removed');
-}
-
-function settleAdvances(){
-  const emp=data.employees.find(e=>e.id===advEmpId);
-  const total=advTotal(advEmpId);
-  data.advances[String(advEmpId)]=[];
-  save();renderAdvList();renderAll();
-  toast('✓ '+(emp?emp.name:'Employee')+' advances cleared — '+fmt$(total)+' settled','ok');
-}
-
-/* ── Employee CRUD ──────────────────────────────────── */
-function renderColorPicks(chosen){
-  const cp=document.getElementById('color-picks');cp.innerHTML='';
-  COLORS.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.className='color-pick'+(i===chosen?' chosen':'');
-    d.style.background=c.dot;
-    d.onclick=()=>{chosenColor=i;renderColorPicks(i);};
-    cp.appendChild(d);
-  });
-}
-function openAddModal(){
-  modalMode='add';chosenColor=0;
-  document.getElementById('modal-title').textContent='Add employee';
-  document.getElementById('del-box').style.display='none';
-  document.getElementById('modal-fields').style.display='block';
-  document.getElementById('f-name').value='';document.getElementById('f-role').value='';
-  renderColorPicks(0);
-  document.getElementById('modal-btns').innerHTML='<button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="saveModal()">Add</button>';
-  document.getElementById('modal-bg').classList.add('open');
-  setTimeout(()=>document.getElementById('f-name').focus(),50);
-}
-function openEditModal(id){
-  const emp=data.employees.find(e=>e.id===id);if(!emp)return;
-  modalMode='edit';editTarget=id;chosenColor=emp.ci;
-  document.getElementById('modal-title').textContent='Edit employee';
-  document.getElementById('del-box').style.display='none';
-  document.getElementById('modal-fields').style.display='block';
-  document.getElementById('f-name').value=emp.name;document.getElementById('f-role').value=emp.role;
-  renderColorPicks(emp.ci);
-  document.getElementById('modal-btns').innerHTML='<button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="saveModal()">Save</button>';
-  document.getElementById('modal-bg').classList.add('open');
-  setTimeout(()=>document.getElementById('f-name').focus(),50);
-}
-function openDelModal(id){
-  const emp=data.employees.find(e=>e.id===id);if(!emp)return;
-  modalMode='delete';editTarget=id;
-  document.getElementById('modal-title').textContent='Delete employee';
-  document.getElementById('del-box').style.display='block';
-  document.getElementById('del-box').textContent='Remove '+emp.name+'? All their data will be lost.';
-  document.getElementById('modal-fields').style.display='none';
-  document.getElementById('modal-btns').innerHTML='<button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-del" onclick="saveModal()">Delete</button>';
-  document.getElementById('modal-bg').classList.add('open');
-}
-function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
-function saveModal(){
-  if(modalMode==='add'){
-    const name=document.getElementById('f-name').value.trim(),role=document.getElementById('f-role').value.trim();
-    if(!name)return;
-    const id=data.nextId++;
-    data.employees.push({id,name,role:role||'Team member',ci:chosenColor});
-    data.state[String(id)]={in:false,inTime:null,logs:[],total:0};
-    data.advances[String(id)]=[];
-  }else if(modalMode==='edit'){
-    const emp=data.employees.find(e=>e.id===editTarget);if(!emp)return;
-    const name=document.getElementById('f-name').value.trim();if(!name)return;
-    emp.name=name;emp.role=document.getElementById('f-role').value.trim()||emp.role;emp.ci=chosenColor;
-  }else if(modalMode==='delete'){
-    data.employees=data.employees.filter(e=>e.id!==editTarget);
-    delete data.state[String(editTarget)];delete data.advances[String(editTarget)];
-    if(sel===editTarget)sel=null;
-  }
-  closeModal();save();renderAll();
-}
-document.getElementById('modal-bg').addEventListener('click',e=>{if(e.target===document.getElementById('modal-bg'))closeModal();});
-
-function tick(){
-  const now=new Date();
-  document.getElementById('live-clock').textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.getElementById('today-date').textContent=now.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-  renderAll();
-}
-
-loadData();
-if(data.bannerDismissed)document.getElementById('import-banner').style.display='none';
-tick();
-setInterval(tick,1000);
-</script>
 </body>
 </html>
