@@ -232,7 +232,126 @@
         .modal-close-btn { width:100%; padding:10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; font-weight:600; cursor:pointer; font-size:13px; color:#475569; }
         .modal-close-btn:hover { background:#e2e8f0; }
         .adv-pill-badge { display:inline-block; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; }
-    </style>
+    
+        /* ── MOBILE RESPONSIVE ─────────────────────────────────── */
+        @media (max-width: 600px) {
+
+            body { padding: 12px; }
+
+            /* Header */
+            .header-widget {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px 18px;
+            }
+            .brand-text h1 { font-size: 20px; }
+            .brand-text p { font-size: 12px; }
+            .clock-wrapper {
+                width: 100%;
+                justify-content: space-between;
+            }
+            #analogueClockCanvas { width: 60px; height: 60px; }
+            #digitalClock { font-size: 15px; padding: 6px 12px; }
+            #fbStatus { display: block; margin-top: 6px; font-size: 11px; }
+
+            /* Main grid: force single column */
+            .app-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0;
+            }
+
+            /* Cards */
+            .card { padding: 16px; margin-bottom: 16px; border-radius: 12px; }
+            .card h2 { font-size: 14px; }
+
+            /* Kiosk grid: 2 columns on mobile */
+            .kiosk-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                max-height: none;
+            }
+            .employee-block { padding: 16px 8px; }
+            .employee-name { font-size: 13px; }
+
+            /* Absence form: stack vertically */
+            .card > div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Admin backup box: stack buttons */
+            .admin-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .admin-box > div {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                width: 100%;
+            }
+            .admin-box .btn {
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+            }
+
+            /* Roster list taller on mobile */
+            .roster-ui-list { max-height: 120px; }
+
+            /* Right pane: remove fixed height */
+            .right-pane .card { height: auto !important; }
+
+            /* Metrics bar */
+            .metrics-counter-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .metric-value { font-size: 16px; }
+
+            /* Dashboard rows */
+            .dash-row { font-size: 13px; padding: 10px 12px; }
+            .timer-badge { font-size: 12px; padding: 3px 8px; }
+
+            /* Analytics section */
+            .analytics-section { padding: 16px; border-radius: 12px; }
+            .analytics-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .analytics-header > div {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+            .analytics-header .btn,
+            .analytics-header .btn-danger-outline {
+                width: 100%;
+                text-align: center;
+            }
+
+            /* Table: make scrollable */
+            table { font-size: 12px; }
+            th, td { padding: 8px 10px; }
+
+            /* Form inputs */
+            input[type="text"], select, input[type="date"] {
+                font-size: 16px; /* prevents iOS zoom */
+                padding: 10px 12px;
+            }
+            .btn { font-size: 13px; padding: 10px 14px; }
+            .form-inline { flex-wrap: wrap; }
+            .form-inline input { min-width: 0; flex: 1; }
+
+            /* Advances modal */
+            .modal-box { padding: 20px 16px; }
+            .adv-form-row { grid-template-columns: 1fr !important; }
+        }
+
+        @media (max-width: 400px) {
+            .kiosk-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+
+</style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
