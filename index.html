@@ -228,10 +228,7 @@
         .adv-form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
         .adv-add-btn { background:#f59e0b; color:white; border:none; border-radius:8px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:13px; }
         .adv-add-btn:hover { background:#d97706; }
-        .adv-settle-row { display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 16px; margin-bottom:14px; }
-        .adv-settle-label { font-size:12px; color:#166534; font-weight:600; }
-        .adv-settle-btn { background:#10b981; color:white; border:none; border-radius:8px; padding:7px 14px; font-weight:700; cursor:pointer; font-size:12px; }
-        .adv-settle-btn:hover { background:#059669; }
+
         .modal-close-btn { width:100%; padding:10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; font-weight:600; cursor:pointer; font-size:13px; color:#475569; }
         .modal-close-btn:hover { background:#e2e8f0; }
         .adv-pill-badge { display:inline-block; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; }
@@ -437,22 +434,16 @@
 
                 if (isClockedIn) {
                     block.className = "employee-block block-in";
-                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">⏱️ Working</div><div class="hover-action-text">🛑 Clock Out</div>`;
+                    const advTotalIn = getAdvTotal(worker);
+                    const advLabelIn = advTotalIn > 0 ? ` $${advTotalIn.toFixed(0)}` : '';
+                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">⏱️ Working</div><div class="hover-action-text">🛑 Clock Out</div><button onclick="event.stopPropagation();openAdvModal('${escapeHtml(worker).replace(/'/g,"\'")}')" style="margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;">💰${advLabelIn}</button>`;
                     block.onclick = () => processPunchOut(worker);
-                    const advBtnIn = document.createElement('button');
-                    advBtnIn.innerHTML = '💰' + (getAdvTotal(worker) > 0 ? ` <span class="adv-pill-badge">$${getAdvTotal(worker).toFixed(0)}</span>` : '');
-                    advBtnIn.title = 'Advances'; advBtnIn.style.cssText = 'margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;';
-                    advBtnIn.onclick = (e) => { e.stopPropagation(); openAdvModal(worker); };
-                    block.appendChild(advBtnIn);
                 } else {
                     block.className = "employee-block block-out";
-                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">💤 Off Clock</div><div class="hover-action-text">⚡ Clock In</div>`;
+                    const advTotalOut = getAdvTotal(worker);
+                    const advLabelOut = advTotalOut > 0 ? ` $${advTotalOut.toFixed(0)}` : '';
+                    block.innerHTML = `<div class="employee-name">${escapeHtml(worker)}</div><div class="status-indicator">💤 Off Clock</div><div class="hover-action-text">⚡ Clock In</div><button onclick="event.stopPropagation();openAdvModal('${escapeHtml(worker).replace(/'/g,"\'")}')" style="margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;">💰${advLabelOut}</button>`;
                     block.onclick = () => processPunchIn(worker);
-                    const advBtnOut = document.createElement('button');
-                    advBtnOut.innerHTML = '💰' + (getAdvTotal(worker) > 0 ? ` <span class="adv-pill-badge">$${getAdvTotal(worker).toFixed(0)}</span>` : '');
-                    advBtnOut.title = 'Advances'; advBtnOut.style.cssText = 'margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700;';
-                    advBtnOut.onclick = (e) => { e.stopPropagation(); openAdvModal(worker); };
-                    block.appendChild(advBtnOut);
                 }
                 kiosk.appendChild(block);
             });
@@ -628,13 +619,14 @@
         // --- EXCEL SPREADSHEETS REPORTS CSV GENERATOR EXPORT PIPELINE ---
         function exportTableToCSV() {
             if (databaseLogs.length === 0) { alert("Export Database contains no logs."); return; }
-            let csvLines = ["Employee Name,Entry Type,Target Date,Clocked In Code,Clocked Out Code,Decimal Hours Productive,Formatted Duration Summary Description"];
+            let csvLines = ["Employee Name,Entry Type,Target Date,Clocked In Code,Clocked Out Code,Decimal Hours Productive,Formatted Duration Summary Description,Total Advances ($)"];
 
             databaseLogs.forEach(log => {
                 const isAbsence = log.type === "EXCUSED_ABSENCE";
                 let decimalHrs = (isAbsence) ? "0.00" : ((log.durationMs || 0) / (1000 * 60 * 60)).toFixed(2);
                 let textSummary = formatDurationString(log.durationMs, isAbsence, log.absenceLabel).replace(/,/g, " -");
                 
+                const empAdvTotal = getAdvTotal(log.employee);
                 let lineRow = [
                     `"${log.employee.replace(/"/g, '""')}"`,
                     `"${log.type}"`,
@@ -642,7 +634,8 @@
                     `"${log.inTime}"`,
                     `"${log.outTime}"`,
                     `"${decimalHrs}"`,
-                    `"${textSummary}"`
+                    `"${textSummary}"`,
+                    `"${empAdvTotal.toFixed(2)}"`
                 ];
                 csvLines.push(lineRow.join(","));
             });
@@ -755,7 +748,7 @@
             const list = getAdvList(currentAdvWorker);
             const total = getAdvTotal(currentAdvWorker);
             document.getElementById('advModalTotal').innerText = '$' + total.toFixed(2);
-            document.getElementById('advSettleRow').style.display = total > 0 ? 'flex' : 'none';
+
 
             const listEl = document.getElementById('advModalList');
             listEl.innerHTML = '';
@@ -801,13 +794,7 @@
             refreshInterface();
         }
 
-        function settleAdvances() {
-            if (!confirm('Mark all advances for ' + currentAdvWorker + ' as settled and reset to $0?')) return;
-            advancesDB[currentAdvWorker] = [];
-            saveAdvances();
-            renderAdvModal();
-            refreshInterface();
-        }
+
         // ── END ADVANCES MODULE ──────────────────────────────────────
 
         document.getElementById('newEmployeeName').addEventListener('keypress', function(e) { if (e.key === 'Enter') { createNewWorker(); } });
@@ -842,10 +829,7 @@
                 <button class="adv-add-btn" onclick="addAdvance()">+ Add Advance</button>
             </div>
 
-            <div class="adv-settle-row" id="advSettleRow" style="display:none">
-                <span class="adv-settle-label">✅ Mark all as settled (reset to $0)</span>
-                <button class="adv-settle-btn" onclick="settleAdvances()">Settled & Paid</button>
-            </div>
+
 
             <button class="modal-close-btn" onclick="closeAdvModal()">Close</button>
         </div>
