@@ -233,6 +233,8 @@
         .modal-close-btn:hover { background:#e2e8f0; }
         .adv-pill-badge { display:inline-block; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; }
     </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -242,7 +244,7 @@
         <div class="header-widget">
             <div class="brand-text">
                 <h1>Workforce Time Station</h1>
-                <p>Kiosk Attendance Dashboard & Authorized Absence Registry</p>
+                <p>Kiosk Attendance Dashboard & Authorized Absence Registry &nbsp;<span id="fbStatus" style="font-size:11px;padding:2px 10px;border-radius:20px;background:#fef9c3;color:#854d0e;font-weight:700;">⏳ Connecting...</span></p>
             </div>
             <div class="clock-wrapper">
                 <canvas id="analogueClockCanvas" width="90" height="90"></canvas>
@@ -358,10 +360,43 @@
     </div>
 
     <script>
-        // Core Encapsulated Persistence Databases Storage
-        let employeesRoster = JSON.parse(localStorage.getItem('sys_roster')) || [];
-        let runningShifts = JSON.parse(localStorage.getItem('sys_active_shifts')) || {};
-        let databaseLogs = JSON.parse(localStorage.getItem('sys_logs')) || [];
+        // ── FIREBASE INIT ────────────────────────────────────────
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyE_LEWTW_yiOCBsMk2J__XwptWT6DCM4",
+            authDomain: "petratimetracker.firebaseapp.com",
+            databaseURL: "https://petratimetracker-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "petratimetracker",
+            storageBucket: "petratimetracker.firebasestorage.app",
+            messagingSenderId: "178350670048",
+            appId: "1:178350670048:web:4e00bda5945d4c35395085"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ── DATA STATE (kept in memory, synced from Firebase) ────
+        let employeesRoster = [];
+        let runningShifts = {};
+        let databaseLogs = [];
+        let advancesDB = {};
+
+        // ── FIREBASE LISTENERS (real-time sync) ──────────────────
+        db.ref('roster').on('value', snap => {
+            employeesRoster = snap.val() || [];
+            refreshInterface();
+        });
+        db.ref('shifts').on('value', snap => {
+            runningShifts = snap.val() || {};
+            refreshInterface();
+        });
+        db.ref('logs').on('value', snap => {
+            databaseLogs = snap.val() || [];
+            renderLogsTableUI();
+            calculateGlobalMetrics();
+        });
+        db.ref('advances').on('value', snap => {
+            advancesDB = snap.val() || {};
+            refreshInterface();
+        });
 
         // Global Loop Engine
         function globalClockEngine() {
@@ -689,10 +724,15 @@
             }
         }
 
-        function saveToDisk(key, objectData) { localStorage.setItem(key, JSON.stringify(objectData)); }
+        function saveToDisk(key, objectData) {
+            // Map old localStorage keys to Firebase paths
+            const keyMap = { 'sys_roster': 'roster', 'sys_active_shifts': 'shifts', 'sys_logs': 'logs', 'sys_advances': 'advances' };
+            const path = keyMap[key] || key;
+            db.ref(path).set(objectData);
+        }
 
         function exportBackupData() {
-            const state = { roster: employeesRoster, shifts: runningShifts, logs: databaseLogs };
+            const state = { roster: employeesRoster, shifts: runningShifts, logs: databaseLogs, advances: advancesDB };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SystemStateBackup.json");
             document.body.appendChild(a); a.click(); a.remove();
@@ -703,19 +743,21 @@
             try {
                 const p = JSON.parse(jsonStr);
                 if (p.roster && p.shifts && p.logs) {
-                    employeesRoster = p.roster; runningShifts = p.shifts; databaseLogs = p.logs;
-                    saveToDisk('sys_roster', employeesRoster); saveToDisk('sys_active_shifts', runningShifts); saveToDisk('sys_logs', databaseLogs);
-                    refreshInterface(); alert("Restored Successfully!");
+                    saveToDisk('sys_roster', p.roster);
+                    saveToDisk('sys_active_shifts', p.shifts);
+                    saveToDisk('sys_logs', p.logs);
+                    if (p.advances) saveToDisk('sys_advances', p.advances);
+                    alert("Restored Successfully! Data syncing to Firebase...");
                 }
             } catch(e) { alert("Invalid format profiles."); }
         }
 
 
         // ── ADVANCES MODULE ─────────────────────────────────────────
-        let advancesDB = JSON.parse(localStorage.getItem('sys_advances')) || {};
+        // advancesDB is now loaded from Firebase (see init above)
         let currentAdvWorker = null;
 
-        function saveAdvances() { localStorage.setItem('sys_advances', JSON.stringify(advancesDB)); }
+        function saveAdvances() { saveToDisk('sys_advances', advancesDB); }
 
         function getAdvList(name) { return advancesDB[name] || []; }
 
@@ -798,6 +840,18 @@
         // ── END ADVANCES MODULE ──────────────────────────────────────
 
         document.getElementById('newEmployeeName').addEventListener('keypress', function(e) { if (e.key === 'Enter') { createNewWorker(); } });
+
+        // ── FIREBASE CONNECTION STATUS ────────────────────────────
+        db.ref('.info/connected').on('value', snap => {
+            const el = document.getElementById('fbStatus');
+            if (snap.val()) {
+                el.textContent = '🟢 Live — synced across all devices';
+                el.style.background = '#f0fdf4'; el.style.color = '#166534';
+            } else {
+                el.textContent = '🔴 Offline — reconnecting...';
+                el.style.background = '#fef2f2'; el.style.color = '#991b1b';
+            }
+        });
         function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     </script>
 
